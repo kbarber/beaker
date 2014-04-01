@@ -68,7 +68,7 @@ module Beaker
         @logger.notify("\nCalling fleet.start")
         fleet.start
       rescue Fog::Errors::Error, SystemCallError => ex
-        @logger.notify("\nException raised calling fleet.start: \#<#{ex.class.to_s)}: #{ex.message}>")
+        @logger.notify("\nException raised calling fleet.start: \#<#{ex.class.to_s}: #{ex.message}>")
         fleet_retries += 1
         if fleet_retries <= 3
           sleep_time = rand(10) + 10
