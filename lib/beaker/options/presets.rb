@@ -23,6 +23,7 @@ module Beaker
           :pe_ver => ENV['pe_ver'],
           :project => ENV['BEAKER_project'],
           :department => ENV['BEAKER_department'],
+          :details => ENV['BEAKER_details'],
         }.delete_if {|key, value| value.nil? or value.empty? })
       end
 
