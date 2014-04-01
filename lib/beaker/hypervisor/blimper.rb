@@ -82,10 +82,22 @@ module Beaker
           sleep_before_destroy = rand(5)
           @logger.notify("\nSleeping #{sleep_before_destroy} seconds before calling fleet.destroy")
           sleep sleep_before_destroy
+
+          destroy_retries = 0
           begin
             @logger.notify("\nCalling fleet.destroy")
             timeout(300) do
               fleet.destroy
+            end
+          rescue Fog::Compute::AWS::Error => ex
+            @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
+            destroy_retries += 1
+            if destroy_retries <= 3
+              @logger.notify("\NRetrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
+              sleep rand(10)
+              retry
+            else
+              raise ex
             end
           rescue => ex
             @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
@@ -95,9 +107,21 @@ module Beaker
           retry
         else
           @logger.error("\nRetried Fog #{fleet_retries} times, giving up, calling fleet.destroy and throwing the exception")
+
+          destroy_retries = 0
           begin
             timeout(300) do
               fleet.destroy
+            end
+          rescue Fog::Compute::AWS::Error => ex
+            @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
+            destroy_retries += 1
+            if destroy_retries <= 3
+              @logger.notify("\NRetrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
+              sleep rand(10)
+              retry
+            else
+              raise ex
             end
           rescue => ex
             @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
