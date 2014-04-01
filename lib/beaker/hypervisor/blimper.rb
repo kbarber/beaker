@@ -78,7 +78,7 @@ module Beaker
           sleep_time = rand(10) + 10
           @logger.notify("\nCalling fleet.destroy, sleeping #{sleep_time} seconds and retrying fleet.start. Current retry attempt is #{fleet_retries}.")
           begin
-            timeout(30) do
+            timeout(300) do
               fleet.destroy
             end
           rescue
@@ -89,7 +89,7 @@ module Beaker
         else
           @logger.error("\nRetried Fog #{fleet_retries} times, giving up, calling fleet.destroy and throwing the exception")
           begin
-            timeout(30) do
+            timeout(300) do
               fleet.destroy
             end
           rescue
