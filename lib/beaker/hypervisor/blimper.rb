@@ -93,7 +93,7 @@ module Beaker
             @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
             destroy_retries += 1
             if destroy_retries <= 3
-              @logger.notify("\NRetrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
+              @logger.notify("\nRetrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
               sleep rand(10)
               retry
             else
@@ -110,6 +110,7 @@ module Beaker
 
           destroy_retries = 0
           begin
+            @logger.notify("\nCalling fleet.destroy")
             timeout(300) do
               fleet.destroy
             end
