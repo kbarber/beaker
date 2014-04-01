@@ -65,22 +65,32 @@ module Beaker
       # transient.
       fleet_retries = 0
       begin
+        @logger.notify("\nCalling fleet.start")
         fleet.start
       rescue Fog::Errors::Error, SystemCallError => ex
+        @logger.notify("\nException raised calling fleet.start: \#<#{ex.class.to_s)}: #{ex.message}>")
         fleet_retries += 1
         if fleet_retries <= 3
           sleep_time = rand(10) + 10
-          @logger.notify("Calling fleet.destroy, sleeping #{sleep_time} seconds and retrying fleet.start due to exception #{ex.class.to_s} (#{ex.message}), retry attempt #{fleet_retries}.")
+          @logger.notify("\nCalling fleet.destroy, sleeping #{sleep_time} seconds and retrying fleet.start. Current retry attempt is #{fleet_retries}.")
           begin
             timeout(30) do
               fleet.destroy
             end
           rescue
+            @logger.notify("\nTimed out calling fleet.destroy")
           end
           sleep sleep_time
           retry
         else
-          @logger.error("Retried Fog #{fleet_retries} times, giving up and throwing the exception")
+          @logger.error("\nRetried Fog #{fleet_retries} times, giving up, calling fleet.destroy and throwing the exception")
+          begin
+            timeout(30) do
+              fleet.destroy
+            end
+          rescue
+            @logger.notify("\nTimed out calling fleet.destroy")
+          end
           raise ex
         end
       end
