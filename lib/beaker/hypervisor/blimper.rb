@@ -1,7 +1,7 @@
 require 'blimpy'
 require 'yaml' unless defined?(YAML)
 
-module Beaker 
+module Beaker
   class Blimper < Beaker::Hypervisor
 
     def amiports(host)
@@ -38,8 +38,8 @@ module Beaker
         @hosts.each do |host|
           amitype = host['vmname'] || host['platform']
           amisize = host['amisize'] || 'm1.small'
-          #use snapshot provided for this host 
-          image_type = host['snapshot'] 
+          #use snapshot provided for this host
+          image_type = host['snapshot']
           if not image_type
             raise "No snapshot/image_type provided for blimpy provisioning"
           end
@@ -75,8 +75,11 @@ module Beaker
         @logger.notify("\nException raised calling fleet.start: \#<#{ex.class.to_s}: #{ex.message}>")
         fleet_retries += 1
         if fleet_retries <= 3
-          sleep_time = rand(10) + 10
+          # Provide some expanding back-off with some randomization
+          sleep_time = 10
+          fleet_retries.times { sleep_time += 10 + rand(10) }
           @logger.notify("\nCalling fleet.destroy, sleeping #{sleep_time} seconds and retrying fleet.start. Current retry attempt is #{fleet_retries}.")
+          sleep rand(5)
           begin
             timeout(300) do
               fleet.destroy
