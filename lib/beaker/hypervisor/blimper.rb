@@ -74,11 +74,10 @@ module Beaker
       rescue Fog::Errors::Error, SystemCallError => ex
         @logger.notify("\nException raised calling fleet.start: \#<#{ex.class.to_s}: #{ex.message}>")
         fleet_retries += 1
-        if fleet_retries <= 3
+        if fleet_retries <= 10
           @logger.notify("\nRetrying due to failure. Current retry attempt is #{fleet_retries}.")
-          # Provide some expanding back-off with some randomization
-          sleep_time = 10
-          fleet_retries.times { sleep_time += 10 + rand(10) }
+
+
           sleep_before_destroy = rand(5)
           @logger.notify("\nSleeping #{sleep_before_destroy} seconds before calling fleet.destroy")
           sleep sleep_before_destroy
@@ -92,9 +91,15 @@ module Beaker
           rescue Fog::Compute::AWS::Error => ex
             @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
             destroy_retries += 1
-            if destroy_retries <= 3
+            if destroy_retries <= 10
               @logger.notify("\nRetrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
-              sleep rand(10)
+
+              # Provide some expanding back-off with some randomization
+              sleep_time = 10
+              destroy_retries.times { sleep_time += 10 + rand(10) }
+              @logger.notify("\nSleeping #{sleep_time} seconds before retrying.")
+              sleep sleep_time
+
               retry
             else
               raise ex
@@ -102,8 +107,13 @@ module Beaker
           rescue => ex
             @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
           end
+
+          # Provide some expanding back-off with some randomization
+          sleep_time = 10
+          fleet_retries.times { sleep_time += 10 + rand(10) }
           @logger.notify("\nSleeping #{sleep_time} seconds before retrying.")
           sleep sleep_time
+
           retry
         else
           @logger.error("\nRetried Fog #{fleet_retries} times, giving up, calling fleet.destroy and throwing the exception")
@@ -117,9 +127,15 @@ module Beaker
           rescue Fog::Compute::AWS::Error => ex
             @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
             destroy_retries += 1
-            if destroy_retries <= 3
+            if destroy_retries <= 10
               @logger.notify("\NRetrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
-              sleep rand(10)
+
+              # Provide some expanding back-off with some randomization
+              sleep_time = 10
+              destroy_retries.times { sleep_time += 10 + rand(10) }
+              @logger.notify("\nSleeping #{sleep_time} seconds before retrying.")
+              sleep sleep_time
+
               retry
             else
               raise ex
