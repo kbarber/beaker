@@ -31,6 +31,14 @@ module Beaker
       @blimpy = Blimpy
     end
 
+    def backoff_sleep(tries)
+      # Provide some expanding back-off with some randomization
+      sleep_time = 1
+      tries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
+      @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds for attempt #{tries}.")
+      sleep sleep_time
+    end
+
     def provision
       ami_spec= YAML.load_file(@options[:ec2_yaml])["AMI"]
 
@@ -77,11 +85,7 @@ module Beaker
         if fleet_retries <= 10
           @logger.notify("\nblimpy: Retrying due to failure. Current retry attempt is #{fleet_retries}.")
 
-          # Provide some expanding back-off with some randomization
-          sleep_time = 1
-          fleet_retries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
-          @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before calling fleet.destroy to cleanup before retrying fleet.start.")
-          sleep sleep_time
+          backoff_sleep(fleet_retries)
 
           destroy_retries = 0
           begin
@@ -95,11 +99,7 @@ module Beaker
             if destroy_retries <= 10
               @logger.notify("\nblimpy: Retrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
 
-              # Provide some expanding back-off with some randomization
-              sleep_time = 10
-              destroy_retries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
-              @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before retrying fleet.destroy.")
-              sleep sleep_time
+              backoff_sleep(destroy_retries)
 
               retry
             else
@@ -109,11 +109,7 @@ module Beaker
             @logger.notify("\nblimpy: Exception calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
           end
 
-          # Provide some expanding back-off with some randomization
-          sleep_time = 10
-          fleet_retries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
-          @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before retrying fleet.start.")
-          sleep sleep_time
+          backoff_sleep(fleet_retries)
 
           retry
         else
@@ -131,11 +127,7 @@ module Beaker
             if destroy_retries <= 10
               @logger.notify("\nblimpy: Retrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
 
-              # Provide some expanding back-off with some randomization
-              sleep_time = 10
-              destroy_retries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
-              @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before retrying fleet.destroy.")
-              sleep sleep_time
+              backoff_sleep(destroy_retries)
 
               retry
             else
