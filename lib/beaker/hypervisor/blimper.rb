@@ -97,7 +97,7 @@ module Beaker
               # Provide some expanding back-off with some randomization
               sleep_time = 10
               destroy_retries.times { sleep_time += 10 + rand(10) }
-              @logger.notify("\nSleeping #{sleep_time} seconds before retrying.")
+              @logger.notify("\nSleeping #{sleep_time} seconds before retrying fleet.destroy.")
               sleep sleep_time
 
               retry
@@ -133,7 +133,7 @@ module Beaker
               # Provide some expanding back-off with some randomization
               sleep_time = 10
               destroy_retries.times { sleep_time += 10 + rand(10) }
-              @logger.notify("\nSleeping #{sleep_time} seconds before retrying.")
+              @logger.notify("\nSleeping #{sleep_time} seconds before retrying fleet.destroy.")
               sleep sleep_time
 
               retry
