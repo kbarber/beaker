@@ -69,35 +69,35 @@ module Beaker
       # transient.
       fleet_retries = 0
       begin
-        @logger.notify("\nCalling fleet.start")
+        @logger.notify("\nblimpy: Calling fleet.start")
         fleet.start
       rescue Fog::Errors::Error, SystemCallError => ex
-        @logger.notify("\nException raised calling fleet.start: \#<#{ex.class.to_s}: #{ex.message}>")
+        @logger.notify("\nblimpy: Exception raised calling fleet.start: \#<#{ex.class.to_s}: #{ex.message}>")
         fleet_retries += 1
         if fleet_retries <= 10
-          @logger.notify("\nRetrying due to failure. Current retry attempt is #{fleet_retries}.")
+          @logger.notify("\nblimpy: Retrying due to failure. Current retry attempt is #{fleet_retries}.")
 
 
-          sleep_before_destroy = rand(5)
-          @logger.notify("\nSleeping #{sleep_before_destroy} seconds before calling fleet.destroy")
+          sleep_before_destroy = 5 + rand(5)
+          @logger.notify("\nblimpy: Sleeping #{sleep_before_destroy} seconds before calling fleet.destroy")
           sleep sleep_before_destroy
 
           destroy_retries = 0
           begin
-            @logger.notify("\nCalling fleet.destroy")
+            @logger.notify("\nblimpy: Calling fleet.destroy")
             timeout(300) do
               fleet.destroy
             end
           rescue Fog::Compute::AWS::Error => ex
-            @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
+            @logger.notify("\nblimpy: Exception calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
             destroy_retries += 1
             if destroy_retries <= 10
-              @logger.notify("\nRetrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
+              @logger.notify("\nblimpy: Retrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
 
               # Provide some expanding back-off with some randomization
               sleep_time = 10
               destroy_retries.times { sleep_time += 10 + rand(10) }
-              @logger.notify("\nSleeping #{sleep_time} seconds before retrying fleet.destroy.")
+              @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before retrying fleet.destroy.")
               sleep sleep_time
 
               retry
@@ -105,35 +105,35 @@ module Beaker
               raise ex
             end
           rescue => ex
-            @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
+            @logger.notify("\nblimpy: Exception calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
           end
 
           # Provide some expanding back-off with some randomization
           sleep_time = 10
           fleet_retries.times { sleep_time += 10 + rand(10) }
-          @logger.notify("\nSleeping #{sleep_time} seconds before retrying.")
+          @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before retrying.")
           sleep sleep_time
 
           retry
         else
-          @logger.error("\nRetried Fog #{fleet_retries} times, giving up, calling fleet.destroy and throwing the exception")
+          @logger.error("\nblimpy: Retried Fog #{fleet_retries} times, giving up.")
 
           destroy_retries = 0
           begin
-            @logger.notify("\nCalling fleet.destroy")
+            @logger.notify("\nblimpy: Calling fleet.destroy")
             timeout(300) do
               fleet.destroy
             end
           rescue Fog::Compute::AWS::Error => ex
-            @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
+            @logger.notify("\nblimpy: Exception calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
             destroy_retries += 1
             if destroy_retries <= 10
-              @logger.notify("\NRetrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
+              @logger.notify("\nblimpy: Retrying fleet.destroy due to failure. Current retry attempt is #{destroy_retries}.")
 
               # Provide some expanding back-off with some randomization
               sleep_time = 10
               destroy_retries.times { sleep_time += 10 + rand(10) }
-              @logger.notify("\nSleeping #{sleep_time} seconds before retrying fleet.destroy.")
+              @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before retrying fleet.destroy.")
               sleep sleep_time
 
               retry
@@ -141,8 +141,9 @@ module Beaker
               raise ex
             end
           rescue => ex
-            @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
+            @logger.notify("\nblimpy: Exception calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
           end
+          @logger.notify("\nblimpy: Throwing exception")
           raise ex
         end
       end
