@@ -23,7 +23,7 @@ module Beaker
           :pe_ver => ENV['pe_ver'],
           :project => ENV['BEAKER_project'],
           :department => ENV['BEAKER_department'],
-          :details => ENV['BEAKER_details'],
+          :jenkins_build_url => ENV['BUILD_URL'],
         }.delete_if {|key, value| value.nil? or value.empty? })
       end
 
@@ -35,7 +35,7 @@ module Beaker
         h.merge({
           :project => 'Beaker',
           :department => ENV['USER'] || ENV['USERNAME'] || 'unknown',
-          :details => 'No details',
+          :jenkins_build_url => nil,
           :log_level => 'verbose',
           :trace_limit => 10,
           :hosts_file => 'sample.cfg',
