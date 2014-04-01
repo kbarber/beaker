@@ -78,8 +78,8 @@ module Beaker
           @logger.notify("\nblimpy: Retrying due to failure. Current retry attempt is #{fleet_retries}.")
 
           # Provide some expanding back-off with some randomization
-          sleep_time = 10
-          fleet_retries.times { sleep_time += 10 + rand(10) }
+          sleep_time = 1
+          fleet_retries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
           @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before calling fleet.destroy to cleanup before retrying fleet.start.")
           sleep sleep_time
 
@@ -97,7 +97,7 @@ module Beaker
 
               # Provide some expanding back-off with some randomization
               sleep_time = 10
-              destroy_retries.times { sleep_time += 10 + rand(10) }
+              destroy_retries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
               @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before retrying fleet.destroy.")
               sleep sleep_time
 
@@ -111,7 +111,7 @@ module Beaker
 
           # Provide some expanding back-off with some randomization
           sleep_time = 10
-          fleet_retries.times { sleep_time += 10 + rand(10) }
+          fleet_retries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
           @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before retrying fleet.start.")
           sleep sleep_time
 
@@ -133,7 +133,7 @@ module Beaker
 
               # Provide some expanding back-off with some randomization
               sleep_time = 10
-              destroy_retries.times { sleep_time += 10 + rand(10) }
+              destroy_retries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
               @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds before retrying fleet.destroy.")
               sleep sleep_time
 
