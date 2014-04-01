@@ -75,18 +75,22 @@ module Beaker
         @logger.notify("\nException raised calling fleet.start: \#<#{ex.class.to_s}: #{ex.message}>")
         fleet_retries += 1
         if fleet_retries <= 3
+          @logger.notify("\nRetrying due to failure. Current retry attempt is #{fleet_retries}.")
           # Provide some expanding back-off with some randomization
           sleep_time = 10
           fleet_retries.times { sleep_time += 10 + rand(10) }
-          @logger.notify("\nCalling fleet.destroy, sleeping #{sleep_time} seconds and retrying fleet.start. Current retry attempt is #{fleet_retries}.")
-          sleep rand(5)
+          sleep_before_destroy = rand(5)
+          @logger.notify("\nSleeping #{sleep_before_destroy} seconds before calling fleet.destroy")
+          sleep sleep_before_destroy
           begin
+            @logger.notify("\nCalling fleet.destroy")
             timeout(300) do
               fleet.destroy
             end
-          rescue
-            @logger.notify("\nTimed out calling fleet.destroy")
+          rescue => ex
+            @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
           end
+          @logger.notify("\nSleeping #{sleep_time} seconds before retrying.")
           sleep sleep_time
           retry
         else
@@ -95,8 +99,8 @@ module Beaker
             timeout(300) do
               fleet.destroy
             end
-          rescue
-            @logger.notify("\nTimed out calling fleet.destroy")
+          rescue => ex
+            @logger.notify("\nException calling fleet.destroy: \#<#{ex.class.to_s}: #{ex.message}>")
           end
           raise ex
         end
