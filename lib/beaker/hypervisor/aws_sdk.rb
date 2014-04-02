@@ -60,12 +60,15 @@ module Beaker
         # TODO: validate image_id exists first perhaps?
 
         # Setup a keypair for this host, if one doesn't already exist
+        @logger.notify("aws-sdk: Ensure key pair exists, create if not")
         key_pair = ensure_key_pair(region)
 
         # Grab the security group, creating one if it doesn't exist
+        @logger.notify("aws-sdk: Ensure security group exists, create if not")
         security_group = ensure_group(region, amiports(host))
 
         # TODO: check options that are needed for launching
+        @logger.notify("aws-sdk: Launch instance")
         config = {
           :count => 1,
           :image_id => image_id,
@@ -83,12 +86,13 @@ module Beaker
         host['instance'] = instance
 
         # Define tags for the instance
+        @logger.notify("aws-sdk: Add tags")
+        instance.add_tag("jenkins_build_url", :value => @options[:jenkins_build_url])
         instance.add_tag("Name", :value => host.name)
         instance.add_tag("department", :value => @options[:department])
         instance.add_tag("project", :value => @options[:project])
-        instance.add_tag("jenkins_build_url", :value => @options[:jenkins_build_url])
 
-        @logger.debug "Launched #{host.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type}"
+        @logger.notify("aws-sdk: Launched #{host.name} (#{amitype}:#{amisize}) using snapshot/image_type #{image_type}")
       end
 
       # Configure our nodes to match the blimp fleet
@@ -96,6 +100,20 @@ module Beaker
       etc_hosts = "127.0.0.1\tlocalhost localhost.localdomain\n"
       @hosts.each do |host|
         instance = host['instance']
+
+        @logger.notify("aws-sdk: Wait for status :running")
+
+        # TODO: should probably be a in a shared method somewhere
+        for tries in 1..10
+          if instance.status == :running
+            # Always sleep, so the next command won't cause a throttle
+            backoff_sleep(tries)
+            break
+          elsif tries == 10
+            raise "Instance never reached state :running"
+          end
+          backoff_sleep(tries)
+        end
 
         name = instance.dns_name
 
@@ -162,9 +180,8 @@ module Beaker
     # @api private
     def backoff_sleep(tries)
       # Exponential with some randomization
-      sleep_time = 1
-      tries.times { sleep_time = sleep_time * (1.8+(rand(200)/1000.0)) }
-      @logger.notify("\nblimpy: Sleeping #{sleep_time} seconds for attempt #{tries}.")
+      sleep_time = 2 ** tries
+      @logger.notify("aws-sdk: Sleeping #{sleep_time} seconds for attempt #{tries}.")
       sleep sleep_time
       nil
     end
