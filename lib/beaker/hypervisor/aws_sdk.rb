@@ -283,9 +283,11 @@ module Beaker
     def load_fog_credentials(dot_fog = '.fog')
       fog = YAML.load_file( dot_fog )
 
+      default = fog[:default]
+
       creds = {}
-      creds[:access_key] = fog[:default]['aws_access_key_id']
-      creds[:secret_key] = fog[:default]['aws_secret_access_key']
+      creds[:access_key] = default[:aws_access_key_id]
+      creds[:secret_key] = default[:aws_secret_access_key]
       creds
     end
   end
