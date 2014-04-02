@@ -115,9 +115,8 @@ module Beaker
           backoff_sleep(tries)
         end
 
-        name = instance.dns_name
-
-        host['ip'] = name
+        host['ip'] = instance.dns_name
+        name = host.name
         host.exec(Command.new("hostname #{name}"))
         ip = get_ip(host)
         domain = get_domain_name(host)
