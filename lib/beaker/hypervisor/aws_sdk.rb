@@ -75,13 +75,6 @@ module Beaker
           :instance_type => amisize,
           :disable_api_termination => false,
           :instance_initiated_shutdown_behavior => "terminate",
-          :block_device_mappings => [{
-            :device_name => "/dev/sda1",
-            :ebs => {
-              :volume_size => 25, # 15 GiB
-              :delete_on_termination => true,
-            }
-          }],
         }
         instance = region.instances.create(config)
 
@@ -105,6 +98,7 @@ module Beaker
         instance = host['instance']
 
         name = instance.dns_name
+
         host['ip'] = name
         host.exec(Command.new("hostname #{name}"))
         ip = get_ip(host)
