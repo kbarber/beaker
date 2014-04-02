@@ -78,7 +78,7 @@ module Beaker
           :block_device_mappings => [{
             :device_name => "/dev/sda1",
             :ebs => {
-              :volume_size => 15, # 15 GiB
+              :volume_size => 25, # 15 GiB
               :delete_on_termination => true,
             }
           }],
