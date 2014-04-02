@@ -117,13 +117,31 @@ module Beaker
 
         host['ip'] = instance.dns_name
         name = host.name
-        host.exec(Command.new("hostname #{name}"))
+
+        # Without this we get 'Unable to authenticate' error message while the
+        # machine is still provisioning
+        # TODO: similar to retry logic above, merge perhaps and modularize?
+        tries = 0
+        begin
+          tries += 1
+          host.exec(Command.new("hostname #{name}"))
+        rescue RuntimeError => ex
+          if tries <= 10
+            backoff_sleep(tries)
+            retry
+          else
+            raise ex
+          end
+        end
+
+        # Construct a suitable /etc/hosts line entry for this host and append it
+        # to the global one
         ip = get_ip(host)
         domain = get_domain_name(host)
         etc_hosts += "#{ip}\t#{name}\t#{name}.#{domain}\n"
       end
 
-      # Send our hosts information to the nodes
+      # Send our /etc/hosts information to all nodes
       @hosts.each do |host|
         set_etc_hosts(host, etc_hosts)
       end
