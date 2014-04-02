@@ -27,6 +27,7 @@ module Beaker
         :logger => Logger.new($stdout),
         :log_level => :debug,
         :log_formatter => AWS::Core::LogFormatter.colored,
+        :max_retries => 10,
       }
       AWS.config(config)
 
